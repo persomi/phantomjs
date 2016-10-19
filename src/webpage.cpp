@@ -1067,6 +1067,29 @@ QString WebPage::renderBase64(const QByteArray& format)
     return "";
 }
 
+QByteArray WebPage::renderBuffer(const QByteArray &format, const int quality)
+{
+    QByteArray nformat = format.toLower();
+
+    // Check if the given format is supported
+    if (QImageWriter::supportedImageFormats().contains(nformat)) {
+        QImage rawPageRendering = renderImage();
+
+        // Prepare buffer for writing
+        QByteArray bytes;
+        QBuffer buffer(&bytes);
+        buffer.open(QIODevice::WriteOnly);
+
+        // Writing image to the buffer, using PNG encoding
+        rawPageRendering.save(&buffer, nformat, quality);
+
+        return bytes;
+    }
+
+    // Return an empty string in case an unsupported format was provided
+    return "";
+}
+
 QImage WebPage::renderImage()
 {
     QSize contentsSize = m_mainFrame->contentsSize();
